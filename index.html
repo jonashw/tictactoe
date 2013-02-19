@@ -1,0 +1,63 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Tic Tac Toe</title>
+	<script type="text/javascript" src="../core/Observable.js"></script>
+	<script type="text/javascript" src="Board.js"></script>
+	<script type="text/javascript" src="Game.js"></script>
+	<script type="text/javascript" src="Player.js"></script>
+	<script type="text/javascript">
+		var board = new Board(4,4,3);	
+		var game = new Game(board, [
+			new Player('Player 1', 'X'),	
+			new Player('Player 2', 'O')
+		]);
+		var textarea;
+		game.on('win',function(player){//tell the user when TTT is attained
+			alert('Tic-Tac-Toe!\n' + player.name);
+		});
+		board.on('cell_changed',function(){//re-draw when a play is made
+			draw();
+		});
+		function draw(){ /* 'drawing' on a textarea is just string concatenation -> value */
+			var content = [];
+			for(var r=1; r <= board.row_count; r++){
+				var line = [];
+				for(var c=1; c <= board.column_count; c++) line.push(board.getCell(r,c) || " ");	
+				content.push(line.join(" "));
+			}
+			textarea.value = content.reverse().join("\n");
+		};
+		window.onload = function(){
+			textarea = document.getElementById('board');
+			/* config the textarea */
+			textarea.rows = board.row_count;
+			textarea.cols = board.column_count * 2 - 1;
+			textarea.style.cursor = 'pointer';
+			textarea.readonly = true;
+			/* initiate a play when the textarea is clicked */
+			textarea.addEventListener('click',function(e){
+				textarea.blur();
+				//determine which row/column was clicked
+				var relX = e.clientX - textarea.offsetLeft;
+				var relY = e.clientY - textarea.offsetTop;
+				var cellWidth = textarea.clientWidth / board.column_count;
+				var cellHeight = textarea.clientHeight / board.row_count;
+				var c = Math.floor(relX/cellWidth) + 1;
+				var r = board.row_count - Math.floor(relY/cellHeight);
+				//play in the row/column
+				game.play(r,c);
+			});
+			draw();
+		};
+	</script>
+	<style>
+		#board { font-size:200%; }
+	</style>
+</head>
+<body>
+	<h1>Tic Tac Toe</h1>
+	<textarea id="board"></textarea>
+</body>
+</html>
